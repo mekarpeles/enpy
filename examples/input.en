@@ -1,0 +1,8 @@
+Compose a function named *factorial* whose definition is as follows:
+
+    Given a starting number called n: *factorial* calculates the product of multiplying a series of descending natural numbers, starting from n and ending with 0. In mathematics, this is written with the notation n!). For examples, refer to www.mathsisfun.com/numbers/factorial.html
+
+    when n is 0, return 1
+    otherwise, return n times the factorial of (n-1)
+
+Test: print the factorial of (4); assert that factorial of (4) is 24
