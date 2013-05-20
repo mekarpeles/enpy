@@ -1,0 +1,27 @@
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
+
+import sys
+import os
+import argparse
+from enpy.parser import main
+
+def argparser():
+    """Parser for command line args"""
+    parser = argparse.ArgumentParser(
+        description="enpy is an English syntax for Python"
+        )
+    parser.add_argument('srcfile', help="infile.en",
+                        type=argparse.FileType('rb'))
+    return parser
+
+
+
+if __name__ == "__main__":
+    """Parses a .en enpy file into python"""
+    parser = argparser()
+    args = parser.parse_args()
+    src = args.srcfile
+    py = "%s.py" % os.path.splitext(args.srcfile.name)[0]
+    with open(py, 'wb') as code:
+        main(src, py, code)
