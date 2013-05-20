@@ -4,6 +4,7 @@
 import sys
 import os
 import argparse
+import subprocess
 from enpy.parser import main
 
 def argparser():
@@ -15,13 +16,13 @@ def argparser():
                         type=argparse.FileType('rb'))
     return parser
 
-
-
 if __name__ == "__main__":
     """Parses a .en enpy file into python"""
     parser = argparser()
     args = parser.parse_args()
     src = args.srcfile
     py = "%s.py" % os.path.splitext(args.srcfile.name)[0]
+    pyfile = "%s.py" % os.path.splitext(sys.argv[1])[0]
     with open(py, 'wb') as code:
-        main(src, py, code)
+        main(src, py, code)        
+    subprocess.check_call(["python", pyfile])
