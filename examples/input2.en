@@ -5,7 +5,7 @@ Provided a starting number: *firstprime* will
    Which takes a number, and some potential divisor:
 
        when the number % the divisor is 0, return the divisor;
-       otherwise, return the inner of the (number, and the divisor+1)
+       otherwise, return the result of inner on the (number, and the divisor+1)
 
    return the result of inner of the (number, and 2)
 

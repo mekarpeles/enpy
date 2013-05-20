@@ -41,6 +41,7 @@ def prune(expr):
     expr = expr.replace(" the ", " ")
     expr = expr.replace(" that ", " ")
     expr = expr.replace(" of ", "")
+    expr = expr.replace(" on ", "")
     expr = expr.replace(" times ", " * ")
     return expr
 
