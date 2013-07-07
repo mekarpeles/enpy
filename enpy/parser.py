@@ -97,14 +97,16 @@ def create_function_header(line, args):
             funcname = token[1:-1]
             largs = args.lower()
             if any(largs.index(x) == 0 for x in 
-                   ["given", "having", "which takes", "provided"]
-                   if x in largs):
+                   ["given", "having", "which takes", "provided", "requiring"]
+                   if x in largs):                
                 args = args.split(':')[0] if ':' in args else args
-                return FUNC % (prespacing * " ", funcname,
-                               ', '.join([arg.split(' ')[-1] 
+                padding = prespacing * " "
+                variables = ''
+                if args.split(' ')[-1].lower() != 'nothing':
+                    variable = ', '.join([arg.split(' ')[-1] 
                                           for arg in args.split(',')])
-                               )
-            return FUNC % (funcname, '')
+                    return FUNC % (padding, funcname, variables)
+            return FUNC % (padding, funcname, variables)
     raise Exception("Failed to process function header:\n%s" % line)
 
 def main(src, pyfilename, code):
