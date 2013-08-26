@@ -116,7 +116,7 @@ def create_function_header(line, args):
 
 def main(src, filenamepy, code):
     filenamepy = filenamepy.split('/')[-1]
-    code.write(HEADER % (filenamepy, '~' * len(py)))
+    code.write(HEADER % (filenamepy, '~' * len(filenamepy)))
 
     def funcp(sline):
         return any([sline.index(x) == 0 for x in 
