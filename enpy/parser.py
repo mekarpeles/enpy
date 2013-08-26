@@ -33,7 +33,8 @@ def innermost_formp(tokens):
     
 def leading_spaces(line):
     """Counts the number of spaces a the beginning of the string"""
-    return len(line) - len(line.lstrip())
+    l = len(line) - len(line.lstrip())
+    return l+1 if l > 0 else l
 
 def prune(expr):
     expr = expr.replace(", and ", ", ")
@@ -96,6 +97,7 @@ def create_function_header(line, args):
     def cleanline():
         return line.strip() if not ':' in line else line.strip().split(':')[0]
 
+    prespacing = leading_spaces(line)
     line = cleanline()
     for token in line.split(" "):
         if funcnamep(token):
@@ -105,7 +107,7 @@ def create_function_header(line, args):
                    ["given", "having", "which takes", "provided", "requiring"]
                    if x in largs):                
                 args = args.split(':')[0] if ':' in args else args
-                padding = leading_spaces(line) * " "
+                padding = prespacing * " "
                 variables = ''
                 if args.split(' ')[-1].lower() != 'nothing':
                     variables = ', '.join([arg.split(' ')[-1] 
@@ -146,7 +148,8 @@ def main(src, filenamepy, code):
             while not args:
                 linenum += 1
                 args = lines[linenum].strip()
-            code.write(create_function_header(line, args))
+            func = create_function_header(line, args)
+            code.write(func)
 
         # If testcase
         elif testcasep(sline):
