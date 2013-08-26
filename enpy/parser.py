@@ -33,7 +33,8 @@ def innermost_formp(tokens):
     
 def leading_spaces(line):
     """Counts the number of spaces a the beginning of the string"""
-    return len(line) - len(line.lstrip())
+    l = len(line) - len(line.lstrip())
+    return l+1 if l > 0 else l
 
 def prune(expr):
     expr = expr.replace(", and ", ", ")
@@ -89,11 +90,17 @@ def parse_line(line):
     return code
 
 def create_function_header(line, args):
-    prespacing = leading_spaces(line)
-    line = line.strip() if not ':' in line else line.strip().split(':')[0]
-    for token in line.split(" "):
+    def funcnamep(token):
+        """Determine if this token is the name of a function"""
+        return '**' == token[0] + token[-1]
 
-        if '**' == token[0] + token[-1]:
+    def cleanline():
+        return line.strip() if not ':' in line else line.strip().split(':')[0]
+
+    prespacing = leading_spaces(line)
+    line = cleanline()
+    for token in line.split(" "):
+        if funcnamep(token):
             funcname = token[1:-1]
             largs = args.lower()
             if any(largs.index(x) == 0 for x in 
@@ -103,45 +110,65 @@ def create_function_header(line, args):
                 padding = prespacing * " "
                 variables = ''
                 if args.split(' ')[-1].lower() != 'nothing':
-                    variable = ', '.join([arg.split(' ')[-1] 
+                    variables = ', '.join([arg.split(' ')[-1] 
                                           for arg in args.split(',')])
                     return FUNC % (padding, funcname, variables)
             return FUNC % (padding, funcname, variables)
     raise Exception("Failed to process function header:\n%s" % line)
 
-def main(src, pyfilename, code):
-    code.write(HEADER % (pyfilename, '~' * len(pyfilename)))
-    index = 0
+def main(src, filenamepy, code):
+    filenamepy = filenamepy.split('/')[-1]
+    code.write(HEADER % (filenamepy, '~' * len(filenamepy)))
+
+    def funcp(sline):
+        return any([sline.index(x) == 0 for x in 
+                    ["compose", "def", "define", "declare"] if x in sline])
+
+    def testcasep(sline):
+        return "test:" in sline and sline.index('test:') == 0
+
     lines = src.readlines()
-    while index < len(lines):
-        line = lines[index]
-        line = prune(line)
+    linenum = 0
+
+    while linenum < len(lines):
+        line = prune(lines[linenum])
         sline = line.lower().strip()
+
+        # Skip blank/empty lines
         if not sline:
-            index += 1
+            linenum +=1
             continue
-        if any([sline.index(x) == 0 for x in 
-                ["compose", "def", "define", "declare"] if x in sline]):
-            index += 1
-            args = lines[index].strip()
+
+        # If it's a function
+        if funcp(sline):
+            linenum += 1
+
+            # Skip until we find the function's params
+            args = lines[linenum].strip()
             while not args:
-                index += 1
-                args = lines[index].strip()
-            code.write(create_function_header(line, args))
-        elif "test:" in sline and sline.index('test:') == 0:
+                linenum += 1
+                args = lines[linenum].strip()
+            func = create_function_header(line, args)
+            code.write(func)
+
+        # If testcase
+        elif testcasep(sline):
             start = line.index(':') + 1
             code.write("\nif __name__ == '__main__':\n")
             line = "    " + line[start:]
             code.write(parse_line(line))
+
+        # Write code as-is
         else:
             code.write(parse_line(line))
-        index += 1
+
+        linenum += 1
 
 if __name__ == "__main__":
     """Parses a .en enpy file into python"""
     en = sys.argv[1]
-    py = "%s.py" % os.path.splitext(en)[0]
+    filename = os.path.splitext(en)[0]
+    py = "%s.py" % filename
     with open(en, 'r') as src:
         with open(py, 'wb') as code:
-            code.write(HEADER % (py, '~' * len(py)))
             main(src, py, code)
